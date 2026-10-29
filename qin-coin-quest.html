@@ -1,0 +1,884 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Qin Coin Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lilita+One&family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --sky1:#6CCBFF; --sky2:#C9F0FF; --card:#FFFFFF; --ink:#1E1846; --text:#1E1846; --muted:#4A4775;
+  --yellow:#FFD23F; --pink:#FF5DA2; --purple:#8A4FFF; --green:#2FCB75; --orange:#FF8C42; --red:#FF4B4B; --blue:#2E9BFF;
+  --soft:#EEF6FF; --okbg:#D9FBE7; --selbg:#FFF4C2;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --sky1:#1B1446; --sky2:#3A2A8C; --card:#2B2366; --ink:#0B0822; --text:#FFFFFF; --muted:#CFC9FF;
+    --soft:#3A3180; --okbg:#1F5A44; --selbg:#5A4A12; color-scheme: dark;
+  }
+}
+:root[data-theme="dark"]{
+  --sky1:#1B1446; --sky2:#3A2A8C; --card:#2B2366; --ink:#0B0822; --text:#FFFFFF; --muted:#CFC9FF;
+  --soft:#3A3180; --okbg:#1F5A44; --selbg:#5A4A12; color-scheme: dark;
+}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;min-height:100vh;background:linear-gradient(180deg,var(--sky1),var(--sky2)) fixed;background-color:var(--sky1);color:var(--text);font-family:Nunito,"Segoe UI",system-ui,sans-serif;font-weight:800;font-size:17px;line-height:1.4}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--purple)}
+.fun{font-family:"Lilita One","Arial Rounded MT Bold","Trebuchet MS",sans-serif;font-weight:400;letter-spacing:.01em}
+button{font:inherit;color:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:4px solid var(--yellow);outline-offset:2px}
+.chunky{border:3px solid var(--ink);border-radius:18px;box-shadow:0 5px 0 var(--ink)}
+.press{transition:transform .08s, box-shadow .08s}
+.press:active:not(:disabled){transform:translateY(4px);box-shadow:0 1px 0 var(--ink)}
+/* HUD */
+.hud{position:sticky;top:env(safe-area-inset-top,0px);z-index:6;display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;background:var(--purple);border-bottom:3px solid var(--ink)}
+.pill{display:flex;align-items:center;gap:6px;background:var(--card);color:var(--text);border:3px solid var(--ink);border-radius:999px;padding:4px 12px 4px 6px;box-shadow:0 3px 0 var(--ink);font-family:"Lilita One",sans-serif;font-size:20px;line-height:1}
+.badge{width:34px;height:34px;border-radius:50%;border:3px solid var(--ink);display:grid;place-items:center;font-size:13px;color:#fff;font-family:"Lilita One",sans-serif;flex:none}
+.coin{--s:30px;width:var(--s);height:var(--s);border-radius:50%;flex:none;background:radial-gradient(circle at 35% 30%,#FFF3A8,#FFD23F 50%,#E0A100);border:3px solid var(--ink);position:relative}
+.coin::after{content:"";position:absolute;inset:30%;background:var(--ink);border-radius:2px}
+.timer{background:var(--card)}
+.timer.danger{background:var(--red);color:#fff;animation:wob .6s infinite}
+@keyframes wob{50%{transform:scale(1.07)}}
+.hud .spacer{flex:1}
+.hudbtn{background:var(--yellow);color:#1E1846;border:3px solid var(--ink);border-radius:14px;box-shadow:0 3px 0 var(--ink);padding:6px 12px;font-family:"Lilita One",sans-serif;font-size:17px}
+.hudbtn.pink{background:var(--pink);color:#fff}
+main{max-width:860px;margin:0 auto;padding:16px 12px 60px}
+.card{background:var(--card);color:var(--text);padding:16px}
+h1,h2,h3{margin:0 0 8px;font-family:"Lilita One",sans-serif;font-weight:400}
+h1{font-size:clamp(34px,9vw,56px);line-height:1}
+h2{font-size:clamp(24px,6vw,32px);line-height:1.1}
+h3{font-size:20px}
+.muted{color:var(--muted);font-weight:700}
+.how{background:var(--soft);border:3px dashed var(--ink);border-radius:14px;padding:10px 12px;margin:8px 0 14px;font-weight:800}
+.how ol{margin:4px 0 0;padding-left:22px}
+.btn{background:var(--card);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:10px 16px;font-weight:900}
+.btn.go{background:var(--green);color:#10331F;font-family:"Lilita One",sans-serif;font-weight:400;font-size:20px}
+.btn.yellow{background:var(--yellow);color:#1E1846}
+.btn:disabled{opacity:.45;cursor:not-allowed;box-shadow:0 4px 0 var(--ink)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.grid{display:grid;gap:12px}
+.teams{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.teambtn{background:var(--card);padding:14px 8px;display:flex;flex-direction:column;align-items:center;gap:8px;font-family:"Lilita One",sans-serif;font-size:20px}
+.teambtn .badge{width:60px;height:60px;font-size:18px}
+/* map */
+.map{grid-template-columns:repeat(auto-fill,minmax(230px,1fr))}
+.zone{background:var(--card);padding:14px;text-align:left;display:flex;gap:12px;align-items:center;position:relative}
+.zone .em{font-size:40px;line-height:1;width:58px;height:58px;display:grid;place-items:center;border-radius:16px;border:3px solid var(--ink);flex:none}
+.zone .zt{font-family:"Lilita One",sans-serif;font-size:21px;display:block}
+.zone .zs{font-size:14px;color:var(--muted)}
+.stamp{position:absolute;top:-10px;right:-6px;background:var(--green);color:#10331F;border:3px solid var(--ink);border-radius:999px;padding:2px 10px;font-size:14px;transform:rotate(6deg)}
+.stamp.storm{background:var(--purple);color:#fff}
+.stamp.play{background:var(--yellow);color:#1E1846}
+/* tiles */
+.tile{background:var(--card);border:3px solid var(--ink);border-radius:14px;box-shadow:0 4px 0 var(--ink);padding:10px;min-height:56px;display:flex;align-items:center;gap:10px;text-align:left;font-weight:800;width:100%}
+.tile .em{font-size:30px;line-height:1;flex:none}
+.tile.sel{background:var(--selbg);outline:4px solid var(--yellow);outline-offset:1px}
+.tile.ok{background:var(--okbg);cursor:default;box-shadow:0 2px 0 var(--ink)}
+.tile.bad{background:var(--red);color:#fff;animation:shake .35s}
+.tile .tag{margin-left:auto;background:var(--green);color:#10331F;border:2px solid var(--ink);border-radius:999px;min-width:28px;height:28px;display:grid;place-items:center;font-size:14px;flex:none}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.colhead{font-family:"Lilita One",sans-serif;font-size:17px;text-align:center;background:var(--yellow);color:#1E1846;border:3px solid var(--ink);border-radius:12px;padding:4px}
+.cols .grid{gap:10px}
+@media (max-width:480px){.tile{font-size:14px;padding:8px;gap:6px}.tile .em{font-size:24px}}
+/* ladder */
+.ladder{display:grid;gap:8px;justify-items:center;margin:6px 0 16px}
+.step{border:3px dashed var(--ink);border-radius:14px;min-height:52px;display:flex;align-items:center;justify-content:center;gap:8px;padding:6px 10px;background:var(--soft);font-weight:900}
+.step.filled{border-style:solid;background:var(--card);box-shadow:0 4px 0 var(--ink)}
+.step.ok{background:var(--okbg)}
+.step .n{font-family:"Lilita One",sans-serif;color:var(--muted)}
+.pool{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}
+/* code */
+.cipher{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}
+.cipher span{width:48px;height:56px;display:grid;place-items:center;background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:12px;font-family:"Lilita One",sans-serif;font-size:30px;box-shadow:0 4px 0 var(--ink)}
+.key{overflow-x:auto;margin:10px 0;border:3px solid var(--ink);border-radius:12px;background:var(--card)}
+.key table{border-collapse:collapse;font-family:"Lilita One",sans-serif;font-size:17px}
+.key td{border-right:2px solid var(--soft);padding:4px 8px;text-align:center;min-width:30px}
+.key tr:first-child td{background:var(--purple);color:#fff}
+.key tr td:first-child{font-family:Nunito,sans-serif;font-weight:900;font-size:13px;white-space:nowrap}
+input[type=text]{font:inherit;font-family:"Lilita One",sans-serif;font-size:24px;letter-spacing:.1em;text-transform:uppercase;padding:8px 12px;border-radius:14px;border:3px solid var(--ink);background:var(--card);color:var(--text);width:180px}
+input.bad{animation:shake .35s;background:var(--red);color:#fff}
+/* boss */
+.boss{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.bossface{width:72px;height:72px;border-radius:50%;background:var(--red);border:3px solid var(--ink);display:grid;place-items:center;font-size:40px;flex:none;box-shadow:0 4px 0 var(--ink)}
+.bossface.hit{animation:shake .35s}
+.hpbar{display:flex;gap:3px;margin-top:6px;border:3px solid var(--ink);border-radius:10px;padding:3px;background:var(--card)}
+.hpbar i{flex:1;height:14px;border-radius:4px;background:var(--red)}
+.hpbar i.gone{background:var(--soft)}
+.qbox{display:flex;gap:12px;align-items:center;background:var(--soft);border:3px solid var(--ink);border-radius:14px;padding:12px;margin:10px 0 12px}
+.qbox .em{font-size:44px;line-height:1}
+.qbox p{margin:0;font-size:19px;font-weight:900}
+.answers{grid-template-columns:1fr 1fr}
+@media (max-width:480px){.answers{grid-template-columns:1fr}}
+/* backpack */
+.bag{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0 12px}
+.bag button{background:var(--card);border:3px solid var(--ink);border-radius:999px;box-shadow:0 3px 0 var(--ink);padding:6px 12px;font-weight:900;font-size:15px}
+.bag button.active{background:var(--yellow);color:#1E1846}
+.bag button:disabled{opacity:.4;cursor:not-allowed}
+/* shop */
+.shop{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.item{background:var(--card);padding:14px;display:flex;flex-direction:column;gap:6px}
+.item .em{font-size:40px;line-height:1}
+.price{display:flex;align-items:center;gap:6px;font-family:"Lilita One",sans-serif;font-size:20px}
+.price .coin{--s:22px}
+.limit{font-size:13px;color:var(--muted)}
+.banner{background:var(--yellow);color:#1E1846;border:3px solid var(--ink);border-radius:16px;padding:12px 14px;margin-bottom:14px;box-shadow:0 4px 0 var(--ink)}
+.big{font-family:"Lilita One",sans-serif;font-size:clamp(40px,12vw,72px);line-height:1}
+.toast{position:fixed;left:50%;top:38%;z-index:20;transform:translate(-50%,-50%);font-family:"Lilita One",sans-serif;font-size:clamp(36px,10vw,64px);color:var(--yellow);-webkit-text-stroke:3px #1E1846;paint-order:stroke fill;pointer-events:none;animation:pop 1.1s ease-out forwards;white-space:nowrap}
+.toast.neg{color:var(--red)}
+@keyframes pop{0%{opacity:0;transform:translate(-50%,-30%) scale(.6)}20%{opacity:1;transform:translate(-50%,-50%) scale(1.1)}100%{opacity:0;transform:translate(-50%,-110%) scale(1)}}
+.hide{display:none!important}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.hud .rankpill{font-size:16px}
+.stars{font-size:15px;letter-spacing:1px}
+.zone.locked{opacity:.6}
+.lockmsg{font-size:13px;color:var(--muted)}
+/* drag */
+.piece{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab}
+.piece.lifted{opacity:.3}
+.piece.sel{outline:4px solid var(--yellow);outline-offset:2px}
+.ghost{position:fixed;z-index:50;pointer-events:none;opacity:.92;transform:scale(1.06) rotate(-2deg);box-shadow:0 10px 18px rgba(0,0,0,.3)!important}
+[data-drop].hover{outline:4px dashed var(--pink);outline-offset:2px}
+[data-drop].bad{animation:shake .35s;background-color:var(--red)!important}
+/* jigsaw */
+.jig{display:grid;grid-template-columns:auto 1fr;gap:14px;align-items:start}.jig .side{text-align:center}
+@media (max-width:600px){.jig{grid-template-columns:1fr}}
+.frame{--n:3;width:min(330px,86vw);aspect-ratio:1;display:grid;grid-template-columns:repeat(var(--n),1fr);gap:3px;padding:6px;background:#8B5A2B;border:4px solid var(--ink);border-radius:14px;box-shadow:0 5px 0 var(--ink);margin:0 auto}
+.slot{background:rgba(255,255,255,.35);border:2px dashed rgba(30,24,70,.5);border-radius:4px;display:grid;place-items:center;color:rgba(30,24,70,.5);font-family:"Lilita One",sans-serif;font-size:20px}
+.slot.filled{border:0;border-radius:2px}
+.jp{background-size:300% 300%;background-repeat:no-repeat}
+.tray{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:12px}
+.tray .piece{width:min(84px,24vw);aspect-ratio:1;border:3px solid var(--ink);border-radius:8px;box-shadow:0 3px 0 var(--ink);padding:0}
+.peek{width:110px;aspect-ratio:1;border:3px solid var(--ink);border-radius:10px;background-size:cover}
+/* map */
+.mapwrap{position:relative;width:min(560px,100%);margin:0 auto;border:4px solid var(--ink);border-radius:16px;overflow:hidden;box-shadow:0 5px 0 var(--ink)}
+.mapwrap svg{display:block;width:100%;height:auto}
+.mk{position:absolute;transform:translate(-50%,-50%);min-width:38px;height:38px;border-radius:999px;border:3px solid var(--ink);background:#fff;color:#1E1846;display:grid;place-items:center;font-family:"Lilita One",sans-serif;font-size:16px;padding:0 6px;box-shadow:0 3px 0 var(--ink)}
+.mk.ok{background:var(--yellow)}
+.labels{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin-top:12px}
+.lab{background:var(--card);border:3px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);padding:8px 10px;text-align:left}
+.lab b{font-family:"Lilita One",sans-serif;font-weight:400;font-size:19px;display:block}
+.lab span{font-size:13px;color:var(--muted)}
+/* timeline & sort */
+.tl{display:grid;gap:8px;margin-bottom:12px}
+.tslot{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:stretch}
+.tdate{background:var(--purple);color:#fff;border:3px solid var(--ink);border-radius:12px;display:grid;place-items:center;font-family:"Lilita One",sans-serif;font-size:17px;text-align:center;padding:4px}
+.tbox{min-height:54px;border:3px dashed var(--ink);border-radius:12px;background:var(--soft);display:flex;align-items:center;padding:6px 10px;font-weight:800}
+.tbox.ok{border-style:solid;background:var(--okbg)}
+.cards{display:flex;flex-direction:column;gap:8px}
+.cardp{background:var(--card);border:3px solid var(--ink);border-radius:12px;box-shadow:0 3px 0 var(--ink);padding:10px;text-align:left;font-weight:800;width:100%}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.bin{border:3px dashed var(--ink);border-radius:16px;background:var(--soft);min-height:150px;padding:8px;display:flex;flex-direction:column;gap:6px}
+.bin h3{text-align:center;margin:0 0 4px;font-size:18px}
+.bin .done{background:var(--okbg);border:2px solid var(--ink);border-radius:10px;padding:6px 8px;font-size:14px}
+.fact{background:var(--okbg);border:3px solid var(--ink);border-radius:14px;padding:10px 12px;margin-top:12px}
+.relics{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}
+.relic{background:var(--card);padding:12px;display:flex;flex-direction:column;gap:4px;text-align:center;align-items:center}
+.relic .em{font-size:44px}
+.relic.owned{background:var(--okbg)}
+.relic .fx{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:8px;margin:8px 0 14px}
+.tabs button{flex:1;background:var(--soft);border:3px solid var(--ink);border-radius:14px;padding:8px;font-family:"Lilita One",sans-serif;font-size:18px;box-shadow:0 3px 0 var(--ink)}
+.tabs button.on{background:var(--yellow);color:#1E1846}
+.ranks{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.ranks span{border:2px solid var(--ink);border-radius:999px;padding:2px 10px;font-size:14px;background:var(--soft)}
+.ranks span.on{background:var(--yellow);color:#1E1846}
+.dock{position:sticky;bottom:0;z-index:3;background:var(--card);border-top:3px solid var(--ink);margin:12px -16px -16px;padding:10px 12px calc(10px + env(safe-area-inset-bottom,0px));max-height:36vh;overflow-y:auto;border-radius:0 0 15px 15px;box-shadow:0 -6px 12px rgba(30,24,70,.12)}
+.dock::before{content:"Drag from here ⬆";display:block;width:100%;text-align:center;font-size:12px;color:var(--muted);margin-bottom:6px;flex-basis:100%;grid-column:1/-1}
+.frame{width:min(330px,86vw,44vh)}
+@media (max-width:480px){.hud{gap:6px;padding:8px}.pill{font-size:16px;padding:3px 9px 3px 4px}.badge{width:28px;height:28px;font-size:11px}.coin{--s:24px}.hudbtn{font-size:15px;padding:5px 9px}.hud .tn{display:none}.lab{padding:6px 8px}.lab b{font-size:17px}}
+@media (max-width:600px){.jig .side{display:flex;align-items:center;gap:10px;justify-content:center}.jig .peek{width:72px}}
+
+.codein{font-size:17px;letter-spacing:.04em;width:min(320px,100%)}
+.codebox{font-family:"Lilita One",sans-serif;font-size:clamp(20px,5.5vw,30px);letter-spacing:.06em;background:var(--soft);border:3px dashed var(--ink);border-radius:14px;padding:14px;word-break:break-all;text-align:center;user-select:all;-webkit-user-select:all}
+.prog{height:14px;border:3px solid var(--ink);border-radius:999px;background:var(--card);overflow:hidden;margin-top:8px}
+.prog i{display:block;height:100%;background:var(--green)}
+.scrollitem{display:flex;gap:12px;align-items:flex-start;border-bottom:2px dashed var(--soft);padding:10px 0}
+.scrollitem .em{font-size:30px;line-height:1}
+.scrollitem p{margin:4px 0 0;font-weight:700}
+.lockedfact{opacity:.55}
+</style>
+</head>
+<body>
+<header class="hud hide" id="hud"></header>
+<main id="app"></main>
+<script>
+(function(){
+"use strict";
+const KEY="qinquest-v4", ZONE_MS=4*60*1000, RUSH_PER_DAY=2;
+const TEAMS=[{id:"qin",name:"Qin",color:"#E0A100"},{id:"chu",name:"Chu",color:"#FF4B4B"},{id:"qi",name:"Qi",color:"#2E9BFF"},{id:"yan",name:"Yan",color:"#2FCB75"},{id:"han",name:"Han",color:"#FF8C42"},{id:"zhao",name:"Zhao",color:"#8A4FFF"},{id:"wei",name:"Wei",color:"#FF5DA2"}];
+const RANKS=[[0,"💰","Merchant"],[60,"🔨","Craftsman"],[140,"🌾","Farmer"],[250,"🏯","Noble"],[400,"👑","Emperor"]];
+/* ---------- pictures (drawn, so they always load) ---------- */
+const WALL_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><defs><linearGradient id="s" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6CCBFF"/><stop offset="1" stop-color="#FFE6B3"/></linearGradient></defs><rect width="300" height="300" fill="url(#s)"/><circle cx="242" cy="58" r="28" fill="#FFD23F" stroke="#1E1846" stroke-width="4"/><g fill="#fff" stroke="#1E1846" stroke-width="3"><ellipse cx="70" cy="52" rx="36" ry="14"/><ellipse cx="150" cy="82" rx="24" ry="10"/></g><path d="M0 172 L50 110 L95 160 L150 92 L205 150 L255 104 L300 150 L300 300 L0 300Z" fill="#6FBF73" stroke="#1E1846" stroke-width="4" stroke-linejoin="round"/><path d="M0 190 L50 132 L95 180 L150 116 L205 170 L255 128 L300 172" fill="none" stroke="#1E1846" stroke-width="20" stroke-linejoin="round"/><path d="M0 190 L50 132 L95 180 L150 116 L205 170 L255 128 L300 172" fill="none" stroke="#E2BE8E" stroke-width="13" stroke-linejoin="round"/><path d="M0 186 L50 128 L95 176 L150 112 L205 166 L255 124 L300 168" fill="none" stroke="#8B5A2B" stroke-width="3" stroke-dasharray="5 6"/><g fill="#E2BE8E" stroke="#1E1846" stroke-width="3"><rect x="37" y="96" width="26" height="34"/><rect x="137" y="80" width="26" height="34"/><rect x="242" y="92" width="26" height="34"/></g><g fill="#B3262A" stroke="#1E1846" stroke-width="2"><path d="M34 98 L50 84 L66 98Z"/><path d="M134 82 L150 68 L166 82Z"/><path d="M239 94 L255 80 L271 94Z"/></g><g fill="#1E1846"><rect x="46" y="110" width="8" height="12"/><rect x="146" y="94" width="8" height="12"/><rect x="251" y="106" width="8" height="12"/></g><path d="M0 238 Q75 186 150 222 T300 208 L300 300 L0 300Z" fill="#3E9E57" stroke="#1E1846" stroke-width="4"/><g stroke="#1E1846" stroke-width="2"><circle cx="40" cy="262" r="7" fill="#FF5DA2"/><circle cx="96" cy="250" r="6" fill="#FFD23F"/><circle cx="190" cy="262" r="7" fill="#FF8C42"/><circle cx="262" cy="248" r="6" fill="#fff"/><circle cx="140" cy="280" r="6" fill="#8A4FFF"/></g></svg>`;
+const WARRIOR_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><rect width="300" height="300" fill="#F1D3A2"/><rect y="0" width="300" height="34" fill="#C98E5A"/><g fill="#B9875A" stroke="#1E1846" stroke-width="2.5">${[20,62,104,196,238,280].map(x=>`<rect x="${x-11}" y="62" width="22" height="34" rx="4"/><circle cx="${x}" cy="54" r="10"/>`).join("")}</g><g fill="#A67448" stroke="#1E1846" stroke-width="2.5">${[0,42,258,300].map(x=>`<rect x="${x-13}" y="128" width="26" height="40" rx="4"/><circle cx="${x}" cy="118" r="12"/>`).join("")}</g><rect y="272" width="300" height="28" fill="#C98E5A"/><g stroke="#1E1846" stroke-width="4" stroke-linejoin="round"><rect x="124" y="228" width="22" height="56" rx="4" fill="#8F5E3B"/><rect x="154" y="228" width="22" height="56" rx="4" fill="#8F5E3B"/><ellipse cx="133" cy="286" rx="16" ry="8" fill="#5A3A22"/><ellipse cx="167" cy="286" rx="16" ry="8" fill="#5A3A22"/><path d="M104 142 L84 214" fill="none" stroke-width="18"/><path d="M104 142 L84 214" fill="none" stroke="#B86B3A" stroke-width="11"/><path d="M196 142 L216 214" fill="none" stroke-width="18"/><path d="M196 142 L216 214" fill="none" stroke="#B86B3A" stroke-width="11"/><circle cx="84" cy="218" r="10" fill="#D49A6A"/><circle cx="216" cy="218" r="10" fill="#D49A6A"/><path d="M104 138 L196 138 L206 236 L94 236Z" fill="#B3262A"/><path d="M110 150 L190 150 L196 212 L104 212Z" fill="#7A3E1F"/></g><g fill="#E2BE8E">${[0,1,2,3,4].map(r=>[0,1,2,3,4].map(c=>`<circle cx="${120+c*15}" cy="${160+r*12}" r="3"/>`).join("")).join("")}</g><rect x="98" y="214" width="104" height="10" fill="#FFD23F" stroke="#1E1846" stroke-width="3"/><rect x="138" y="118" width="24" height="22" fill="#D49A6A" stroke="#1E1846" stroke-width="3"/><circle cx="150" cy="92" r="34" fill="#D49A6A" stroke="#1E1846" stroke-width="4"/><path d="M118 84 Q150 46 182 84 Q170 64 150 62 Q130 64 118 84Z" fill="#3B2A20" stroke="#1E1846" stroke-width="3"/><circle cx="172" cy="56" r="12" fill="#3B2A20" stroke="#1E1846" stroke-width="3"/><g fill="#1E1846"><ellipse cx="138" cy="92" rx="4" ry="5"/><ellipse cx="162" cy="92" rx="4" ry="5"/></g><path d="M134 108 Q150 100 166 108" fill="none" stroke="#1E1846" stroke-width="4" stroke-linecap="round"/><circle cx="116" cy="96" r="6" fill="#D49A6A" stroke="#1E1846" stroke-width="3"/><circle cx="184" cy="96" r="6" fill="#D49A6A" stroke="#1E1846" stroke-width="3"/></svg>`;
+const MAP_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Map of the Warring States"><rect width="400" height="300" fill="#5BC0EB"/><path d="M28 58 Q120 18 250 28 Q330 18 352 58 L346 118 Q372 160 342 190 Q352 240 300 272 L58 274 Q16 200 28 58Z" fill="#A6DB6E" stroke="#1E1846" stroke-width="4" stroke-linejoin="round"/><path d="M50 118 Q140 40 220 98 T342 112" fill="none" stroke="#E0A100" stroke-width="6" stroke-linecap="round"/><path d="M64 214 Q160 184 230 208 T338 200" fill="none" stroke="#2E9BFF" stroke-width="6" stroke-linecap="round"/><g font-family="Arial, sans-serif" font-weight="700" font-size="11" fill="#1E1846"><text x="88" y="82">Yellow River</text><text x="96" y="232">Yangtze River</text><text x="356" y="160" font-size="14">Sea</text></g><g transform="translate(40,250)" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#1E1846"><path d="M0 -22 L7 0 L0 -5 L-7 0Z" fill="#FF4B4B" stroke="#1E1846" stroke-width="2"/><text x="-4" y="-26">N</text></g></svg>`;
+
+const GEO_SVG=`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 300" role="img" aria-label="Map of ancient China's land and rivers"><rect width="400" height="300" fill="#5BC0EB"/><path d="M28 58 Q120 18 250 28 Q330 18 352 58 L346 118 Q372 160 342 190 Q352 240 300 272 L58 274 Q16 200 28 58Z" fill="#A6DB6E" stroke="#1E1846" stroke-width="4" stroke-linejoin="round"/><path d="M40 70 Q100 40 190 48 Q200 80 150 96 Q90 104 46 110Z" fill="#F2D38B" stroke="#1E1846" stroke-width="3"/><g fill="#C9A24A">${[[70,72],[100,66],[130,62],[160,64],[90,88],[120,84],[150,80]].map(([x,y])=>`<circle cx="${x}" cy="${y}" r="3"/>`).join("")}</g><g fill="#B8B8C8" stroke="#1E1846" stroke-width="3" stroke-linejoin="round"><path d="M40 268 L62 222 L84 268Z"/><path d="M70 268 L96 210 L122 268Z"/><path d="M110 268 L132 228 L154 268Z"/></g><g fill="#fff"><path d="M90 223 L96 210 L102 223Z"/><path d="M57 233 L62 222 L67 233Z"/></g><path d="M120 128 Q170 92 230 120 T340 128" fill="none" stroke="#E0A100" stroke-width="7" stroke-linecap="round"/><path d="M150 220 Q210 196 260 214 T338 206" fill="none" stroke="#2E9BFF" stroke-width="7" stroke-linecap="round"/><g transform="translate(372,40)" font-family="Arial, sans-serif" font-weight="700" font-size="12" fill="#1E1846"><path d="M0 -14 L7 8 L0 3 L-7 8Z" fill="#FF4B4B" stroke="#1E1846" stroke-width="2"/><text x="-4" y="22">N</text></g></svg>`;
+const uri=svg=>'url("data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svg)+'")';
+
+const LADDER=[["👑","Emperor"],["🏯","Nobles"],["🌾","Farmers"],["🔨","Craftsmen"],["💰","Merchants"]];
+const LIFE=[[["👧","As a girl"],["👨","She obeys her father"]],[["👰","As a wife"],["🤵","She obeys her husband"]],[["👵","As a widow (her husband has died)"],["👦","She obeys her son"]]];
+const CODES=[{c:"TLQ",a:"QIN",em:"🏯",clue:"The state that won the Warring States"},{c:"ZDOO",a:"WALL",em:"🧱",clue:"Qin Shi Huang joined these together to keep enemies out"},{c:"VLON",a:"SILK",em:"🧵",clue:"Soft cloth made by silkworms"}];
+const INV=[[["🧵","Silk"],["Soft cloth made by silkworms, traded far away"]],[["📜","Paper"],["Made from plants and rags, cheaper than writing on bamboo"]],[["🧭","Compass"],["A magnet shaped like a spoon that points south"]],[["🎆","Gunpowder"],["A black powder that explodes, later used in fireworks"]],[["📖","Woodblock printing"],["Carve a page into wood, add ink, press: many copies of a book"]],[["🐸","Earthquake detector"],["A bronze jar where a ball drops into a toad’s mouth when the ground shakes"]]];
+const BELIEFS=[[["🙇","Confucianism"],["Respect your parents, elders and rulers. Be kind and honest."]],[["☯️","Daoism"],["Live simply and in harmony with nature."]],[["⚖️","Legalism"],["Strict laws and harsh punishments keep order."]],[["🕯️","Ancestor worship"],["Honour family members who have died by giving offerings."]],[["☀️","Mandate of Heaven"],["Heaven gives a good ruler the right to rule. A bad ruler loses it."]]];
+const WORDS=[[["👑","Dynasty"],["A line of rulers from the same family"]],[["📅","BCE"],["“Before Common Era”: years counted backwards before year 1"]],[["🏺","Artefact"],["An object made by people in the past"]],[["⛏️","Archaeologist"],["A person who digs up and studies things from the past"]],[["🪜","Hierarchy"],["A ranking of groups from most to least powerful"]],[["🏙️","Civilisation"],["A large society with cities, a government and writing"]]];
+const STATES=[
+  {id:"qin",name:"Qin",x:18,y:48,clue:"Far in the west"},{id:"zhao",name:"Zhao",x:47,y:20,clue:"In the north"},
+  {id:"yan",name:"Yan",x:76,y:16,clue:"Far in the north-east"},{id:"qi",name:"Qi",x:82,y:44,clue:"In the east, by the sea"},
+  {id:"wei",name:"Wei",x:62,y:40,clue:"In the middle, south of Zhao"},{id:"han",name:"Han",x:42,y:53,clue:"A small state, west of Wei"},
+  {id:"chu",name:"Chu",x:55,y:78,clue:"The big state in the south, by the Yangtze"}];
+const GEO=[
+  {id:"gobi",name:"Gobi Desert",x:30,y:24,clue:"Dry and sandy, in the north-west"},
+  {id:"hima",name:"Himalaya Mountains",x:24,y:80,clue:"The highest mountains, in the south-west"},
+  {id:"yellow",name:"Yellow River",x:58,y:39,clue:"In the north. Its yellow mud made rich farmland"},
+  {id:"yangtze",name:"Yangtze River",x:62,y:70,clue:"China’s longest river, in the south"},
+  {id:"sea",name:"The sea",x:93,y:62,clue:"In the east: the Pacific Ocean"}];
+const TIMELINE=[["about 770 BCE","The Zhou kings start losing power"],["475 BCE","The Warring States period begins"],["221 BCE","Qin wins and Qin Shi Huang becomes the First Emperor"],["about 214 BCE","Work begins joining walls into the Great Wall"],["210 BCE","Qin Shi Huang dies"],["206 BCE","The Han dynasty begins"]];
+const SORT_QSH={bins:[["good","🏗️ Built or united"],["bad","😠 Harsh things"]],items:[["United all of China into one country","good"],["Made everyone use the same coins and writing","good"],["Built roads and canals","good"],["Joined walls into the Great Wall","good"],["Burned books he didn’t agree with","bad"],["Gave very harsh punishments","bad"],["Forced workers to build, and many died","bad"],["Made people pay heavy taxes","bad"]]};
+const SORT_SILK={bins:[["out","⬅️ Sent out from China"],["in","➡️ Came into China"]],items:[["Silk cloth","out"],["Shiny lacquered bowls and boxes","out"],["Bronze mirrors","out"],["Strong horses from Central Asia","in"],["Glass from the Roman Empire","in"],["Grapes","in"],["Buddhism, a religion from India","in"]]};
+const SORT_SRC={bins:[["p","📜 Primary (made at the time)"],["s","📚 Secondary (made later)"]],items:[["A terracotta warrior from Qin Shi Huang’s tomb","p"],["An oracle bone from the Shang dynasty","p"],["A bronze cooking pot from 1200 BCE","p"],["A coin made in the Qin dynasty","p"],["A history textbook written in 2020","s"],["A TV documentary about the Great Wall","s"],["A museum website explaining oracle bones","s"],["A modern drawing of Qin Shi Huang’s palace","s"]]};
+/* question bank: [icon, question, [correct, wrong, wrong, wrong], why] */
+const BANK=[
+  ["📅","When did Qin Shi Huang unite China?",["221 BCE","1066 CE","1500 CE","2000 BCE"],"In 221 BCE Qin defeated the last rival state."],
+  ["🪙","Qin Shi Huang made everyone in China use the same…",["Coins, writing and measurements","Clothes","Religion","Music"],"Using the same coins, writing and measurements made China easier to rule and trade in."],
+  ["🗿","What was built to guard Qin Shi Huang’s tomb?",["An army of clay soldiers","A palace of gold","A lake of ice","A forest of bamboo"],"About 8,000 life-sized clay soldiers, the Terracotta Army, were buried near his tomb."],
+  ["⚖️","Qin Shi Huang followed Legalism. What did Legalism believe?",["People obey when laws are strict and punishments are harsh","Everyone can do whatever they like","Rulers should never punish anyone","Merchants should be in charge"],"Legalists thought people were selfish, so strict laws were needed to keep order."],
+  ["🔥","What did Qin Shi Huang order to be burned?",["Books","Farms","Temples","Silk"],"He burned books that disagreed with his ideas."],
+  ["🧱","Which wall did Qin Shi Huang start joining together?",["The Great Wall","The Silk Wall","The Dragon Wall","The Jade Wall"],"He joined older walls to protect China from northern invaders."],
+  ["👵","Under the Three Obediences, a widow had to obey her…",["Son","Teacher","Neighbour","Emperor"],"A woman obeyed her father, then her husband, then her son."],
+  ["💰","Which group was at the bottom of the social ladder?",["Merchants","Farmers","Craftsmen","Nobles"],"People thought merchants got rich from other people’s work."],
+  ["⚔️","How many big states fought in the Warring States period?",["7","2","20","100"],"Seven states fought for over 250 years, from 475 to 221 BCE."],
+  ["🌏","Which state was far in the west?",["Qin","Qi","Yan","Chu"],"Qin was in the west. It defeated the other six states."],
+  ["🌾","Why were farmers respected?",["They grew the food everyone needed","They were the richest","They wrote the laws","They led the army"],"Food kept the whole empire alive, so farmers ranked above craftsmen and merchants."],
+  ["🏯","Who ranked just below the emperor?",["Nobles","Merchants","Craftsmen","Farmers"],"Nobles owned land and helped the emperor rule."],
+  ["🏞️","Which river was called “China’s Sorrow” because of its floods?",["Yellow River","Yangtze River","Nile River","Murray River"],"Its floods destroyed homes, but also left rich yellow soil for farming."],
+  ["🌊","Which is China’s longest river?",["Yangtze River","Yellow River","Mekong River","Ganges River"],"The Yangtze is the longest river in Asia."],
+  ["🏜️","Which desert lies to China’s north?",["Gobi Desert","Sahara Desert","Simpson Desert","Kalahari Desert"],"The Gobi Desert helped cut China off from other civilisations."],
+  ["⛰️","How did mountains, deserts and the sea affect ancient China?",["They kept China separated from other civilisations","They made China easy to invade","They stopped all farming","They joined China to Europe"],"Natural barriers isolated China, so it developed its own ideas and inventions."],
+  ["🙇","Confucius taught people to…",["Respect their parents, elders and rulers","Ignore their rulers","Live alone in the mountains","Use harsh punishments"],"Confucianism is about respect, duty and good behaviour."],
+  ["☯️","Daoism teaches people to live in harmony with…",["Nature","Money","War","The army"],"Daoists believed in living simply and following the natural way (the Dao)."],
+  ["☀️","What was the Mandate of Heaven?",["The idea that Heaven chose a good ruler","A law that emperors live forever","A palace in the sky","A tax on farmers"],"If a ruler was cruel or disasters happened, people believed he had lost Heaven’s approval."],
+  ["🕯️","Why did families give offerings to their ancestors?",["To honour family members who had died","To pay their taxes","To buy land","To train soldiers"],"Ancestor worship meant caring for and respecting dead relatives."],
+  ["🦴","What were oracle bones used for?",["Asking ancestors questions about the future","Making soup","Building walls","Paying soldiers"],"Shang kings carved questions on bones, heated them and read the cracks."],
+  ["🐫","What was the Silk Road?",["A network of trade routes","One paved road","A river","A wall"],"It was many routes linking China with Central Asia, India and the Roman Empire."],
+  ["☸️","Which religion came into China along the Silk Road?",["Buddhism","Daoism","Confucianism","Legalism"],"Buddhism came from India. The other three began in China."],
+  ["📜","A terracotta warrior is a…",["Primary source","Secondary source","Modern copy","Textbook"],"It was made at the time, so it is a primary source."],
+  ["📚","A textbook about ancient China written in 2020 is a…",["Secondary source","Primary source","Artefact","Oracle bone"],"It was made long after the time it describes."],
+  ["🛡️","Fu Hao, from the Shang dynasty, was famous as a…",["General who led armies","Merchant","Poet","Farmer"],"Fu Hao shows that some women held real power."],
+  ["🧭","Early Chinese compasses pointed…",["South","North","West","Up"],"The spoon-shaped lodestone compass pointed south."],
+  ["🐸","What did Zhang Heng’s invention detect?",["Earthquakes","Floods","Rain","Enemies"],"When the ground shook, a ball dropped into a toad’s mouth to show the direction."],
+  ["📖","Woodblock printing helped people…",["Make many copies of books quickly","Build ships","Dig canals","Find gold"],"Carved wooden blocks could be inked and pressed again and again."],
+  ["👑","What does “dynasty” mean?",["A line of rulers from the same family","A big city","A temple","A war"],"China was ruled by dynasties such as the Shang, Zhou, Qin and Han."],
+  ["⛏️","What does an archaeologist do?",["Digs up and studies objects from the past","Builds palaces","Writes laws","Trades silk"],"Archaeologists uncovered the Terracotta Army in 1974."],
+  ["🧪","What was Qin Shi Huang searching for before he died?",["A potion to live forever","A lost city","A gold mine","A new river"],"He may have been poisoned by mercury in the “potions” he took."],
+  ["⏳","Which of these happened FIRST?",["The Warring States period began","Qin Shi Huang died","The Han dynasty began","Work began on joining the Great Wall"],"The Warring States began in 475 BCE, long before the Qin dynasty."],
+  ["🏛️","Which dynasty came after the Qin?",["Han","Shang","Zhou","Ming"],"The Han dynasty began in 206 BCE and lasted over 400 years."]
+];
+const RELICS=[
+  {id:"coin",em:"🪙",name:"Banliang coin",price:6,fact:"Qin Shi Huang’s round coin with a square hole was used all across China."},
+  {id:"bone",em:"🦴",name:"Oracle bone",price:8,fact:"Shang kings carved questions on bones, then cracked them with heat to read the answer."},
+  {id:"jade",em:"💚",name:"Jade disc",price:10,fact:"Jade was so precious that nobles were buried with it."},
+  {id:"mirror",em:"🪞",name:"Bronze mirror",price:12,fact:"Polished bronze mirrors had patterns on the back and were treasured gifts."},
+  {id:"kite",em:"🪁",name:"Silk kite",price:14,fact:"Kites were invented in China and were even used to send signals in war."},
+  {id:"horse",em:"🐎",name:"Terracotta horse",price:16,fact:"The Terracotta Army has clay horses and chariots as well as soldiers."},
+  {id:"bamboo",em:"🎋",name:"Bamboo book",price:18,fact:"Before paper, books were written on strips of bamboo tied together."},
+  {id:"seal",em:"🔏",name:"Imperial seal",price:20,fact:"Emperors stamped orders with a carved seal to show they were real."},
+  {id:"ding",em:"🏺",name:"Bronze ding pot",price:24,fact:"Shang nobles used bronze pots called ding to offer food to their ancestors."},
+  {id:"dragon",em:"🐉",name:"Jade dragon",price:28,fact:"The dragon was a symbol of power and good luck, and later of the emperor."},
+  {id:"robe",em:"👘",name:"Silk robe",price:32,fact:"Making silk was a closely guarded secret for hundreds of years."},
+  {id:"sword",em:"🗡️",name:"Qin bronze sword",price:36,fact:"Bronze swords found with the Terracotta Army were still sharp after 2,000 years."}
+];
+const POWER=[
+  {id:"hint",em:"💡",name:"Hint token",desc:"Use inside a zone to get help.",price:3,any:true},
+  {id:"freeze",em:"🧊",name:"Storm freeze",desc:"Use inside a zone: +60 seconds on the storm timer.",price:5},
+  {id:"double",em:"✨",name:"Double coins",desc:"Use inside a zone: coins you earn after that count twice.",price:8},
+  {id:"dragon",em:"🐉",name:"Lucky dragon",desc:"Instantly win between 0 and 10 coins.",price:4}
+];
+const ZONES=[
+  {id:"ladder",name:"Social Ladder",em:"🪜",bg:"#FFD23F",blurb:"Who had the most power?",fn:()=>ladder(),
+    fact:"Social ladder, top to bottom: emperor, nobles, farmers, craftsmen, merchants. Farmers were respected because they grew the food. Merchants were looked down on."},
+  {id:"geo",name:"Rivers & Land",em:"🏞️",bg:"#2FCB75",blurb:"Label China’s geography",fn:()=>mapGeneric({svg:GEO_SVG,spots:GEO,per:2,label:"feature",
+    steps:["China’s land shaped how people lived. Each white circle is a river, desert, mountain range or the sea.","Read the clue on each card, then drag it onto the right circle. (Or tap a card, then tap a circle.)","+2 coins for each right answer, −1 for a wrong one."]}),
+    fact:"Most people farmed near the Yellow River (north) and the Yangtze River (south). The Gobi Desert, the Himalaya Mountains and the sea kept China separated from other civilisations."},
+  {id:"wall",name:"Picture Puzzle: Great Wall",em:"🧩",bg:"#6CCBFF",blurb:"Drag the pieces into the frame",fn:()=>jigsaw(WALL_SVG,"Great Wall",ZONES[2].fact),
+    fact:"Qin Shi Huang joined older walls together to keep out northern invaders. Later dynasties, especially the Ming, built most of the wall we see today."},
+  {id:"life",name:"A Woman’s Life",em:"👘",bg:"#FF5DA2",blurb:"The Three Obediences",fn:()=>life(),
+    fact:"The Three Obediences: a woman obeyed her father, then her husband, then her son. Some women, like the Shang general Fu Hao, still held real power."},
+  {id:"beliefs",name:"Beliefs & Ideas",em:"☯️",bg:"#8A4FFF",blurb:"Match each belief to its meaning",fn:()=>matchGeneric({pairs:BELIEFS,heads:["Belief","What it teaches"],per:2,
+    steps:["Ancient Chinese people followed different beliefs and ideas.","Tap a belief on the LEFT, then tap what it teaches on the RIGHT (or the other way round).","+2 coins for each right match, −1 for a wrong one."]}),
+    fact:"Confucianism: respect and duty. Daoism: harmony with nature. Legalism: strict laws. Ancestor worship: honouring dead relatives. Mandate of Heaven: Heaven chooses a good ruler."},
+  {id:"states",name:"Warring States Map",em:"🗺️",bg:"#2E9BFF",blurb:"Put each state in its place",fn:()=>mapGeneric({svg:MAP_SVG,spots:STATES,per:2,label:"state",
+    steps:["Seven big states fought for power. Each white circle on the map is one state.","Read the clue on each name card, then drag it onto the right circle. (Or tap a card, then tap a circle.)","+2 coins for each right state, −1 for a wrong one."]}),
+    fact:"Seven states fought from 475 to 221 BCE. Qin, far in the west, defeated the other six one by one and united China."},
+  {id:"code",name:"Spy Code",em:"🕵️",bg:"#B3262A",blurb:"Crack a secret message",fn:()=>code(),
+    fact:"During the Warring States period, spies and secret messages were part of war. Qin used spies to weaken rival states."},
+  {id:"timeline",name:"Timeline",em:"⏳",bg:"#FF8C42",blurb:"Put events in order",fn:()=>timeline(),
+    fact:"About 770 BCE: Zhou kings weaken. 475 BCE: Warring States begin. 221 BCE: Qin unites China. About 214 BCE: Great Wall joined. 210 BCE: Qin Shi Huang dies. 206 BCE: Han dynasty begins."},
+  {id:"invent",name:"Invention Match",em:"💡",bg:"#FFD23F",blurb:"What did each invention do?",fn:()=>matchGeneric({pairs:INV,heads:["Invention","What it did"],per:2,
+    steps:["Ancient China invented things we still use today!","Tap an invention on the LEFT, then tap what it did on the RIGHT (or the other way round).","+2 coins for each right match, −1 for a wrong one."]}),
+    fact:"Chinese inventions include silk, paper, the compass, gunpowder, woodblock printing and Zhang Heng’s earthquake detector."},
+  {id:"silk",name:"Silk Road Traders",em:"🐫",bg:"#C98E5A",blurb:"What went out and what came in?",fn:()=>sortGeneric({cfg:SORT_SILK,
+    steps:["The Silk Road linked China with India, Central Asia and the Roman Empire.","Drag each card into the right box: did it go OUT of China, or come IN? (Or tap a card, then tap a box.)","+1 coin for each right card, −1 for a wrong one."]}),
+    fact:"The Silk Road was many trade routes, not one road. China sent out silk, lacquerware and bronze mirrors. Horses, glass, grapes and Buddhism came in."},
+  {id:"warrior",name:"Picture Puzzle: Terracotta Warrior",em:"🧩",bg:"#F2D38B",blurb:"Drag the pieces into the frame",fn:()=>jigsaw(WARRIOR_SVG,"Terracotta Warrior",ZONES[10].fact),
+    fact:"About 8,000 clay soldiers guard Qin Shi Huang’s tomb, and every face is different. Farmers found them by accident in 1974."},
+  {id:"sources",name:"Source Detective",em:"🔍",bg:"#6CCBFF",blurb:"Primary or secondary source?",fn:()=>sortGeneric({cfg:SORT_SRC,
+    steps:["A PRIMARY source was made at the time. A SECONDARY source was made later by someone studying the past.","Ask: who made it, and when? Then drag each card into the right box. (Or tap a card, then tap a box.)","+1 coin for each right card, −1 for a wrong one."]}),
+    fact:"Primary sources were made at the time (artefacts like oracle bones and terracotta warriors). Secondary sources were made later (textbooks, documentaries). Exam tip: always ask WHO made it and WHEN."},
+  {id:"words",name:"Key Words",em:"📝",bg:"#FF5DA2",blurb:"Learn the history words",fn:()=>matchGeneric({pairs:WORDS,heads:["Word","Meaning"],per:2,
+    steps:["Historians use special words. You’ll need these in your exam!","Tap a word on the LEFT, then tap its meaning on the RIGHT (or the other way round).","+2 coins for each right match, −1 for a wrong one."]}),
+    fact:"Key words: dynasty, BCE, artefact, archaeologist, hierarchy, civilisation. Use them in your exam answers!"},
+  {id:"sort",name:"Two Sides of the Emperor",em:"⚖️",bg:"#FF4B4B",blurb:"Sort what Qin Shi Huang did",fn:()=>sortGeneric({cfg:SORT_QSH,
+    steps:["Qin Shi Huang did great things AND cruel things.","Drag each card into the right box. (Or tap a card, then tap a box.)","+1 coin for each right card, −1 for a wrong one."],
+    end:"🧠 Think about it: was Qin Shi Huang a hero, a villain, or both? Be ready to explain your answer to the class!"}),
+    fact:"Qin Shi Huang united China and made coins, writing and measurements the same everywhere. But he ruled harshly: he burned books, forced people to work and charged heavy taxes."},
+  {id:"boss",name:"Boss Battle",em:"👑",bg:"#B3262A",blurb:"Defeat Qin Shi Huang",fn:()=>boss(),needs:10,
+    fact:"Qin Shi Huang (259–210 BCE) was China’s First Emperor. The Qin dynasty lasted only 15 years, but the name “China” may come from “Qin”."},
+  {id:"rush",name:"Revision Rush",em:"⚡",bg:"#2FCB75",blurb:"10 mixed exam-style questions",fn:()=>rush(),extra:true,
+    fact:null}
+];
+/* ---------- helpers ---------- */
+const team=id=>TEAMS.find(t=>t.id===id);
+const $=s=>document.querySelector(s);
+const app=$("#app"), hud=$("#hud");
+const shuffle=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
+function el(tag,attrs,...kids){const e=document.createElement(tag);if(attrs)for(const k in attrs){const v=attrs[k];if(v===false||v==null)continue;if(k==="class")e.className=v;else if(k==="text")e.textContent=v;else if(k.startsWith("on"))e.addEventListener(k.slice(2),v);else if(k==="style")e.style.cssText=v;else e.setAttribute(k,v===true?"":v);}for(const c of kids){if(c==null||c===false)continue;e.append(c.nodeType?c:document.createTextNode(c));}return e;}
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"null");}catch(e){return null;}};
+const store=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+function fresh(teamId){return{team:teamId,coins:0,view:"menu",cur:null,result:null,shopTab:"power",zones:ZONES.map(()=>({done:false,best:0,run:null})),bag:{hint:0,freeze:0,double:0},bought:{freeze:0,double:0,dragon:0},relics:[],rush:{day:"",runs:0}};}
+let S=load(); if(S&&(!S.zones||S.zones.length!==ZONES.length||!team(S.team))) S=null;
+const Z=()=>S.zones[S.cur];
+const R=()=>Z().run;
+const finished=()=>S.zones.filter((z,i)=>z.done&&!ZONES[i].extra).length;
+const MAIN=ZONES.filter(z=>!z.extra).length;
+const relicValue=()=>S.relics.reduce((s,id)=>s+(RELICS.find(r=>r.id===id)||{price:0}).price,0);
+const empire=()=>S.coins+relicValue();
+const rankOf=v=>{let r=RANKS[0];for(const x of RANKS) if(v>=x[0]) r=x; return r;};
+const today=()=>{const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate();};
+const rushLeft=()=>{ if(S.rush.day!==today()) return RUSH_PER_DAY; return Math.max(0,RUSH_PER_DAY-S.rush.runs); };
+function toast(t,neg){const d=el("div",{class:"toast"+(neg?" neg":""),text:t});document.body.append(d);setTimeout(()=>d.remove(),1150);}
+function earn(n){
+  const r=R(); if(!r) return;
+  if(n<0) r.mist++;
+  if(r.replay){ if(n>0) toast("✔"); else toast("✖",true); return; }
+  let amt=n; if(n>0&&r.double) amt=n*2;
+  const before=S.coins; S.coins=Math.max(0,S.coins+amt); const real=S.coins-before;
+  if(real>0) r.earned+=real;
+  if(amt!==0) toast((amt>0?"+":"")+amt+(n>0&&r.double?" ✨":""),amt<0);
+  store(); drawHud();
+}
+const miss=()=>earn(-1);
+function go(view,cur){S.view=view;if(cur!=null)S.cur=cur;tapSel=null;store();render();window.scrollTo(0,0);}
+const fmt=ms=>{const s=Math.ceil(Math.max(0,ms)/1000);return Math.floor(s/60)+":"+String(s%60).padStart(2,"0");};
+const starStr=n=>"⭐".repeat(n)+"☆".repeat(3-n);
+
+/* ---------- save codes (so progress can move to another device) ---------- */
+function hash(str){let h=7;for(const ch of str) h=(h*31+ch.charCodeAt(0)+11)%1679609;return h.toString(36).padStart(4,"0");}
+function makeCode(){
+  const t=TEAMS.findIndex(x=>x.id===S.team);
+  const stars=S.zones.map(z=>z.done?z.best+1:0).join("");
+  const mask=RELICS.reduce((m,r,i)=>S.relics.includes(r.id)?m+Math.pow(2,i):m,0);
+  const parts=[t,S.coins.toString(36),parseInt("1"+stars,5).toString(36),mask.toString(36),S.bag.hint,S.bag.freeze,S.bag.double,S.bought.freeze.toString(36),S.bought.double.toString(36),S.bought.dragon.toString(36)];
+  const body=parts.join("-");
+  return (body+"-"+hash("qcq"+body)).toUpperCase();
+}
+function readCode(code){
+  const p=String(code).trim().toLowerCase().split("-");
+  if(p.length!==11) return null;
+  const chk=p.pop(), body=p.join("-");
+  if(hash("qcq"+body)!==chk) return null;
+  const t=TEAMS[+p[0]]; if(!t) return null;
+  const s=fresh(t.id);
+  s.coins=parseInt(p[1],36)||0;
+  const stars=parseInt(p[2],36).toString(5).slice(1);
+  if(stars.length!==ZONES.length) return null;
+  [...stars].forEach((ch,i)=>{ const v=+ch; if(v>0){ s.zones[i].done=true; s.zones[i].best=v-1; } });
+  const mask=parseInt(p[3],36)||0; s.relics=RELICS.filter((r,i)=>Math.floor(mask/Math.pow(2,i))%2===1).map(r=>r.id);
+  s.bag={hint:+p[4]||0,freeze:+p[5]||0,double:+p[6]||0};
+  s.bought={freeze:parseInt(p[7],36)||0,double:parseInt(p[8],36)||0,dragon:parseInt(p[9],36)||0};
+  return s;
+}
+/* ---------- drag & drop (also works by tapping a piece, then a frame) ---------- */
+let tapSel=null;
+function targetAt(x,y){for(const e of document.elementsFromPoint(x,y)){const t=e.closest&&e.closest("[data-drop]");if(t) return t;}return null;}
+function markSel(){document.querySelectorAll("[data-piece]").forEach(n=>n.classList.toggle("sel",n.getAttribute("data-piece")===tapSel));}
+function draggable(node,id,onDrop){
+  id=String(id); node.setAttribute("data-piece",id); node.classList.add("piece");
+  node.addEventListener("click",e=>{ if(e.detail===0){ tapSel=tapSel===id?null:id; markSel(); } });
+  node.addEventListener("pointerdown",e=>{
+    if(e.pointerType==="mouse"&&e.button!==0) return;
+    e.preventDefault();
+    const sx=e.clientX, sy=e.clientY, r=node.getBoundingClientRect(), ox=sx-r.left, oy=sy-r.top;
+    let ghost=null, over=null, lastY=sy, raf=0;
+    try{node.setPointerCapture(e.pointerId);}catch(_){}
+    const auto=()=>{ if(!ghost) return; const top=(hud.getBoundingClientRect().bottom||0)+50;
+      if(lastY<top) window.scrollBy(0,-14); else if(lastY>window.innerHeight-36) window.scrollBy(0,14);
+      raf=requestAnimationFrame(auto); };
+    const move=ev=>{ lastY=ev.clientY;
+      if(!ghost){ if(Math.hypot(ev.clientX-sx,ev.clientY-sy)<6) return;
+        ghost=node.cloneNode(true); ghost.classList.add("ghost"); ghost.classList.remove("sel"); ghost.style.width=r.width+"px"; ghost.style.height=r.height+"px"; ghost.style.margin="0"; document.body.append(ghost); node.classList.add("lifted"); raf=requestAnimationFrame(auto); }
+      ghost.style.left=(ev.clientX-ox)+"px"; ghost.style.top=(ev.clientY-oy)+"px";
+      const t=targetAt(ev.clientX,ev.clientY); if(t!==over){ if(over) over.classList.remove("hover"); over=t; if(over) over.classList.add("hover"); }
+    };
+    const up=ev=>{
+      node.removeEventListener("pointermove",move); node.removeEventListener("pointerup",up); node.removeEventListener("pointercancel",up);
+      if(over) over.classList.remove("hover"); cancelAnimationFrame(raf);
+      if(ghost){ ghost.remove(); node.classList.remove("lifted"); if(ev.type==="pointerup"){ const t=targetAt(ev.clientX,ev.clientY); if(t){ tapSel=null; onDrop(id,t.getAttribute("data-drop"),t); } } }
+      else if(ev.type==="pointerup"){ tapSel=tapSel===id?null:id; markSel(); }
+    };
+    node.addEventListener("pointermove",move); node.addEventListener("pointerup",up); node.addEventListener("pointercancel",up);
+  });
+}
+function dropTarget(node,key,onDrop){ node.setAttribute("data-drop",String(key)); node.addEventListener("click",()=>{ if(tapSel!=null){ const id=tapSel; tapSel=null; markSel(); onDrop(id,String(key),node); } }); }
+function flashBad(node){ if(!node) return; node.classList.remove("bad"); void node.offsetWidth; node.classList.add("bad"); setTimeout(()=>node.classList.remove("bad"),400); }
+
+/* ---------- HUD ---------- */
+function drawHud(){
+  if(!S){hud.classList.add("hide");return;}
+  hud.classList.remove("hide"); hud.innerHTML="";
+  const t=team(S.team), rk=rankOf(empire());
+  hud.append(el("div",{class:"pill"},el("span",{class:"badge",style:"background:"+t.color,text:t.name.slice(0,3)}),el("span",{class:"tn",text:t.name})));
+  hud.append(el("div",{class:"pill","aria-label":S.coins+" Qin Coins"},el("span",{class:"coin","aria-hidden":"true"}),el("span",{text:String(S.coins)})));
+  hud.append(el("div",{class:"pill rankpill",title:"Your rank: "+rk[2]},rk[1],el("span",{class:"tn",text:" "+rk[2]})));
+  if(S.view==="zone"&&R()) hud.append(el("div",{class:"pill timer",id:"timer"},"🌪️ ",el("span",{id:"timeTxt",text:fmt(R().left)})));
+  hud.append(el("span",{class:"spacer"}));
+  if(S.view!=="menu") hud.append(el("button",{class:"hudbtn press","aria-label":"Map",onclick:()=>go("menu")},"🗺️",el("span",{class:"tn",text:" Map"})));
+  if(S.view!=="shop") hud.append(el("button",{class:"hudbtn pink press","aria-label":"Shop",onclick:()=>go("shop")},"🛒",el("span",{class:"tn",text:" Shop"})));
+}
+let lastTick=Date.now();
+setInterval(()=>{
+  const now=Date.now(), dt=now-lastTick; lastTick=now;
+  if(!S||S.view!=="zone"||!R()) return;
+  const r=R(); if(r.paused) return;
+  r.left-=Math.min(dt,2000);
+  const tt=$("#timeTxt"), tm=$("#timer");
+  if(tt) tt.textContent=fmt(r.left);
+  if(tm) tm.classList.toggle("danger",r.left<=30000);
+  if(r.left<=0){ r.left=0; finishZone(true); }
+  else if(Math.floor(r.left/1000)%5===0) store();
+},250);
+/* ---------- screens ---------- */
+function render(){
+  drawHud(); app.innerHTML="";
+  if(!S) return pickTeam();
+  if(S.view==="shop") return shop();
+  if(S.view==="result") return result();
+  if(S.view==="scroll") return scrollView();
+  if(S.view==="save") return saveView();
+  if(S.view==="zone"){ if(!R()){S.view="menu";return render();} return ZONES[S.cur].fn(); }
+  menu();
+}
+function pickTeam(){
+  const c=el("section",{class:"card chunky"},
+    el("div",{class:"row",style:"gap:12px"},el("span",{class:"coin",style:"--s:60px","aria-hidden":"true"}),el("h1",{text:"Qin Coin Quest"})),
+    el("p",{class:"muted",text:"Solve ancient China puzzles to earn Qin Coins. Collect relics, climb the social ladder from Merchant to Emperor, and build the richest empire!"}),
+    el("h2",{text:"Pick your team"}));
+  const g=el("div",{class:"grid teams"});
+  TEAMS.forEach(t=>g.append(el("button",{class:"teambtn chunky press",onclick:()=>{S=fresh(t.id);store();render();}},el("span",{class:"badge",style:"background:"+t.color,text:t.name.slice(0,3)}),"Team "+t.name)));
+  c.append(g);
+  const inp=el("input",{type:"text",class:"codein",placeholder:"Paste or type your save code","aria-label":"Save code",autocomplete:"off",autocapitalize:"characters",spellcheck:"false"});
+  const msg=el("p",{class:"muted",style:"min-height:1.4em;margin:6px 0 0"});
+  c.append(el("h2",{style:"margin-top:22px",text:"Played before?"}),el("p",{class:"muted",text:"Enter your team’s save code to carry on where you left off."}),
+    el("div",{class:"row"},inp,el("button",{class:"btn yellow press",onclick:()=>{ const s=readCode(inp.value); if(!s){ msg.textContent="That code doesn’t work. Check each letter and number, including the dashes."; return; } S=s; store(); toast("Welcome back!"); render(); },text:"Load"})),msg);
+  app.append(c);
+}
+function menu(){
+  const done=finished(), ev=empire(), rk=rankOf(ev);
+  const next=RANKS.find(x=>x[0]>ev);
+  const pct=next?Math.round((ev-rk[0])/(next[0]-rk[0])*100):100;
+  app.append(el("div",{class:"banner"},
+    el("div",{class:"row",style:"justify-content:space-between"},el("strong",{class:"fun",style:"font-size:22px",text:"🏛️ Empire score: "+ev}),el("span",{text:"= "+S.coins+" coins + "+relicValue()+" in relics"})),
+    el("div",{class:"ranks"},...RANKS.map(x=>el("span",{class:x===rk?"on":"",text:x[1]+" "+x[2]+" ("+x[0]+")"}))),
+    el("div",{class:"prog",role:"progressbar","aria-valuenow":String(pct),"aria-valuemin":"0","aria-valuemax":"100"},el("i",{style:"width:"+pct+"%"})),
+    el("div",{style:"font-size:14px;margin-top:4px",text: next?"Reach "+next[0]+" to become "+next[2]+" ("+(next[0]-ev)+" to go).":"👑 You are Emperor! Keep growing your empire."}),
+    done===MAIN?el("div",{style:"margin-top:6px",text:"🎉 All zones finished! Replay zones for stars, play Revision Rush, and collect relics."}):null));
+  app.append(el("div",{class:"row",style:"margin-bottom:14px"},
+    el("button",{class:"btn press",onclick:()=>go("scroll"),text:"📜 Study scroll"}),
+    el("button",{class:"btn press",onclick:()=>go("save"),text:"💾 Save code"})));
+  const c=el("section",{class:"card chunky"},el("h2",{text:"Zone map"}),
+    el("p",{class:"muted",text:"Play zones in any order. Each has a 4-minute storm timer that pauses when you leave. Replay finished zones to earn more stars: each new star is worth 2 coins."}));
+  const g=el("div",{class:"grid map"});
+  ZONES.forEach((zd,i)=>{
+    const z=S.zones[i];
+    const locked=zd.needs && S.zones.filter((x,j)=>x.done&&j!==i&&!ZONES[j].extra).length<zd.needs && !z.done && !z.run;
+    let sub, stamp=null;
+    if(zd.extra){ const l=rushLeft(); sub=l?"Coin rounds left today: "+l+" of "+RUSH_PER_DAY:"Practice only today (coins again tomorrow)"; if(z.run) stamp=el("span",{class:"stamp play",text:"⏸"}); }
+    else { stamp = z.run?el("span",{class:"stamp play",text:"⏸ "+fmt(z.run.left)}) : z.done?el("span",{class:"stamp",text:"✓"}) : null;
+      sub = locked?"🔒 Finish "+zd.needs+" other zones to unlock" : z.run?"In progress: tap to continue" : z.done?starStr(z.best)+" Tap to replay" : zd.blurb; }
+    g.append(el("button",{class:"zone chunky press"+(locked?" locked":""),disabled:locked,onclick:()=>{ if(locked) return;
+        if(!z.run){ z.run={left:ZONE_MS,d:{},earned:0,mist:0,double:false,replay:zd.extra?false:z.done};
+          if(zd.extra){ if(S.rush.day!==today()){ S.rush={day:today(),runs:0}; } z.run.practice=rushLeft()<=0; if(!z.run.practice) S.rush.runs++; z.run.replay=z.run.practice; } }
+        go("zone",i); }},
+      el("span",{class:"em",style:"background:"+zd.bg,"aria-hidden":"true",text:zd.em}),
+      el("span",null,el("span",{class:"zt",text:(zd.extra?"★ ":(i+1)+". ")+zd.name}),el("span",{class:"zs",text:sub})),stamp));
+  });
+  c.append(g);
+  c.append(el("div",{class:"row",style:"margin-top:18px;justify-content:space-between"},
+    el("span",{class:"muted",text:"Zones finished: "+done+" of "+MAIN}),
+    el("button",{class:"btn press",onclick:()=>{ if(confirm("Start over? This erases your team’s coins, relics and progress on this device. Write down your save code first if you might want it back.")){ try{localStorage.removeItem(KEY);}catch(e){} S=null; render(); } },text:"Start over"})));
+  app.append(c);
+}
+function scrollView(){
+  const c=el("section",{class:"card chunky"},
+    el("div",{class:"row",style:"justify-content:space-between"},el("h2",{style:"margin:0",text:"📜 Study scroll"}),el("button",{class:"btn go press",onclick:()=>go("menu"),text:"◀ Back to map"})),
+    el("p",{class:"muted",text:"Every zone you finish adds its key facts here. Use it to revise for your exam!"}));
+  ZONES.forEach((zd,i)=>{ if(!zd.fact) return; const z=S.zones[i];
+    c.append(el("div",{class:"scrollitem"+(z.done?"":" lockedfact")},el("span",{class:"em","aria-hidden":"true",text:z.done?zd.em:"🔒"}),
+      el("div",null,el("strong",{text:zd.name}),el("p",{text:z.done?zd.fact:"Finish this zone to unlock these facts."})))); });
+  if(S.relics.length){ c.append(el("h3",{style:"margin-top:16px",text:"🏺 Your relic museum"}));
+    RELICS.filter(r=>S.relics.includes(r.id)).forEach(r=>c.append(el("div",{class:"scrollitem"},el("span",{class:"em","aria-hidden":"true",text:r.em}),el("div",null,el("strong",{text:r.name}),el("p",{text:r.fact}))))); }
+  app.append(c);
+}
+function saveView(){
+  const code=makeCode();
+  const box=el("div",{class:"codebox",text:code});
+  const copy=el("button",{class:"btn yellow press",onclick:async()=>{ try{ await navigator.clipboard.writeText(code); copy.textContent="✓ Copied"; }catch(e){ copy.textContent="Copy failed: write it down"; } },text:"📋 Copy code"});
+  app.append(el("section",{class:"card chunky"},
+    el("div",{class:"row",style:"justify-content:space-between"},el("h2",{style:"margin:0",text:"💾 Save code"}),el("button",{class:"btn go press",onclick:()=>go("menu"),text:"◀ Back to map"})),
+    el("p",{class:"muted",text:"Your progress is saved on this device automatically. If you use a different device next lesson, write this code down or copy it somewhere safe. On the new device, tap “Played before?” and enter it."}),
+    box, el("div",{class:"row",style:"margin-top:12px"},copy),
+    el("p",{class:"muted",style:"font-size:14px",text:"The code saves your coins, relics, stars and backpack. A zone you were halfway through will start again."})));
+}
+function zoneTop(steps){
+  const zd=ZONES[S.cur], r=R();
+  const frag=el("div");
+  frag.append(el("div",{class:"row",style:"gap:10px;margin-bottom:6px"},el("span",{style:"font-size:36px","aria-hidden":"true",text:zd.em}),el("h2",{style:"margin:0",text:zd.name})));
+  if(r.practice) frag.append(el("div",{class:"banner",style:"padding:8px 12px",text:"📚 Practice round: no coins this time, but great revision! Coin rounds reset tomorrow."}));
+  else if(r.replay) frag.append(el("div",{class:"banner",style:"padding:8px 12px",text:"🔁 Replay: best so far "+starStr(S.zones[S.cur].best)+". Beat it to earn 2 coins per new star. Fewer mistakes = more stars."}));
+  frag.append(el("div",{class:"how"},"How to play:",el("ol",null,...steps.map(s=>el("li",{text:s})))));
+  frag.append(bagBar());
+  return frag;
+}
+let useHint=()=>false;
+function bagBar(){
+  const r=R();
+  return el("div",{class:"bag"},
+    el("button",{class:"press",disabled:S.bag.hint<1,onclick:()=>{ if(S.bag.hint<1) return; if(useHint()){ S.bag.hint--; store(); if(S.view==="zone"&&R()) render(); } else toast("No hint needed here"); },text:"💡 Hint ×"+S.bag.hint}),
+    el("button",{class:"press",disabled:S.bag.freeze<1,onclick:()=>{ S.bag.freeze--; r.left+=60000; toast("+60s 🧊"); store(); render(); },text:"🧊 Freeze ×"+S.bag.freeze}),
+    el("button",{class:"press"+(r.double?" active":""),disabled:r.double||S.bag.double<1||r.replay,onclick:()=>{ S.bag.double--; r.double=true; toast("Double! ✨"); store(); render(); },text:r.double?"✨ Double ON":"✨ Double ×"+S.bag.double}));
+}
+function finishZone(storm,lost){
+  const z=Z(), r=z.run, zd=ZONES[S.cur]; if(!r) return;
+  if(zd.extra){ S.result={i:S.cur,rush:true,earned:r.earned,score:r.d.score||0,total:r.d.qs?r.d.qs.length:10,practice:!!r.practice,storm:!!storm}; z.run=null; return go("result"); }
+  let stars = storm||lost ? 1 : r.mist===0 ? 3 : r.mist<=2 ? 2 : 1;
+  const res={i:S.cur,earned:r.earned,storm:!!storm,lost:!!lost,stars,replay:r.replay,income:0,starBonus:0};
+  if(r.replay){ const gain=Math.max(0,stars-z.best); res.starBonus=gain*2; S.coins+=res.starBonus; }
+  else { res.income=S.relics.length; S.coins+=res.income; }
+  z.best=Math.max(z.best,stars); z.done=true; z.run=null;
+  S.result=res; go("result");
+}
+function result(){
+  const r=S.result||{i:0,earned:0,stars:1};
+  const body=el("section",{class:"card chunky",style:"text-align:center"});
+  if(r.rush){
+    body.append(el("div",{style:"font-size:64px","aria-hidden":"true",text:"⚡"}),el("h1",{text:"Revision Rush done!"}),
+      el("div",{class:"big",style:"margin:8px 0",text:r.score+" / "+r.total}),
+      el("p",{class:"muted",text:r.practice?"Practice round: no coins, but every question helps for the exam.":"You earned "+r.earned+" coins. Coin rounds left today: "+rushLeft()+"."}));
+  } else {
+    body.append(el("div",{style:"font-size:64px","aria-hidden":"true",text:r.storm?"🌪️":r.lost?"💔":"🏆"}),
+      el("h1",{text:r.storm?"The storm got you!":r.lost?"Out of lives!":"Zone finished!"}),
+      el("div",{style:"font-size:34px;margin:4px 0","aria-label":r.stars+" stars",text:starStr(r.stars)}));
+    if(r.replay) body.append(el("p",{class:"muted",text: r.starBonus? "New best! +"+r.starBonus+" coins for new stars." : "No new stars this time. Fewer mistakes next time!"}));
+    else {
+      body.append(el("p",{class:"muted",text:(r.storm?"Time ran out, but you keep your coins. ":"")+"You earned in "+ZONES[r.i].name+":"}),
+        el("div",{class:"row",style:"justify-content:center;margin:6px 0 10px"},el("span",{class:"coin",style:"--s:44px","aria-hidden":"true"}),el("span",{class:"big",text:"+"+r.earned})));
+      if(r.income) body.append(el("p",{text:"🏺 Your "+r.income+" relic"+(r.income>1?"s":"")+" earned +"+r.income+" bonus coin"+(r.income>1?"s":"")+"!"}));
+      body.append(el("p",{class:"muted",text:"🛒 New shop items unlocked! 📜 New facts added to your study scroll."}));
+    }
+    body.append(el("p",{class:"muted",style:"font-size:14px",text:"Stars: no mistakes = ⭐⭐⭐, 1–2 mistakes = ⭐⭐, more = ⭐"}));
+  }
+  body.append(el("div",{class:"row",style:"justify-content:center"},el("button",{class:"btn go press",onclick:()=>go("menu"),text:"🗺️ Back to map"}),el("button",{class:"btn yellow press",onclick:()=>go("shop"),text:"🛒 Visit shop"})));
+  app.append(body);
+}
+function shop(){
+  const done=finished();
+  const c=el("section",{class:"card chunky"},
+    el("div",{class:"row",style:"justify-content:space-between"},el("h2",{style:"margin:0",text:"🛒 Imperial market"}),el("button",{class:"btn go press",onclick:()=>go("menu"),text:"◀ Back to map"})),
+    el("div",{class:"tabs"},el("button",{class:S.shopTab==="power"?"on":"",onclick:()=>{S.shopTab="power";store();render();},text:"⚡ Power-ups"}),el("button",{class:S.shopTab==="relics"?"on":"",onclick:()=>{S.shopTab="relics";store();render();},text:"🏺 Relics"})));
+  if(S.shopTab==="relics"){
+    c.append(el("p",{class:"muted",text:"Relics keep their value in your Empire score, and each one gives you +1 bonus coin every time you finish a new zone. "+S.relics.length+" of "+RELICS.length+" collected."}));
+    const g=el("div",{class:"grid relics"});
+    RELICS.forEach(rl=>{ const own=S.relics.includes(rl.id);
+      g.append(el("div",{class:"relic chunky"+(own?" owned":"")},el("span",{class:"em","aria-hidden":"true",text:rl.em}),el("strong",{text:rl.name}),
+        own?el("span",{class:"fx",text:rl.fact}):el("span",{class:"price"},el("span",{class:"coin","aria-hidden":"true"}),String(rl.price)),
+        own?el("span",{text:"✓ In your museum"}):el("button",{class:"btn yellow press",disabled:S.coins<rl.price,onclick:()=>{ if(S.coins<rl.price) return; S.coins-=rl.price; S.relics.push(rl.id); toast(rl.em+" collected!"); store(); render(); },text:"Buy"}))); });
+    c.append(g);
+  } else {
+    c.append(el("p",{class:"muted",text:"Buy power-ups now, then use them from your backpack inside a zone. Hint tokens can be bought any time (hold up to 3). Other power-ups unlock one at a time: one of each for every zone you finish. Zones finished: "+done+"."}));
+    const g=el("div",{class:"grid shop"});
+    POWER.forEach(it=>{
+      const left=it.any?3-S.bag.hint:done-S.bought[it.id];
+      const why=it.any?(left<=0?"Backpack full (3 max)":S.coins<it.price?"Not enough coins":""):done===0?"Finish a zone to unlock":left<=0?"Sold out: finish another zone":S.coins<it.price?"Not enough coins":"";
+      g.append(el("div",{class:"item chunky"},el("span",{class:"em","aria-hidden":"true",text:it.em}),el("h3",{style:"margin:0",text:it.name}),el("span",{class:"muted",style:"font-size:15px",text:it.desc}),
+        el("span",{class:"limit",text:"Can buy now: "+Math.max(0,left)+(it.id!=="dragon"?"  ·  In backpack: "+S.bag[it.id]:"")}),
+        el("div",{class:"row",style:"justify-content:space-between;margin-top:auto"},el("span",{class:"price"},el("span",{class:"coin","aria-hidden":"true"}),String(it.price)),
+          el("button",{class:"btn yellow press",disabled:!(left>0&&S.coins>=it.price),onclick:()=>buy(it),text:"Buy"})),
+        why?el("span",{class:"limit",text:why}):null));
+    });
+    c.append(g);
+  }
+  app.append(c);
+}
+function buy(it){
+  const left=it.any?3-S.bag.hint:finished()-S.bought[it.id];
+  if(left<1||S.coins<it.price) return;
+  S.coins-=it.price; if(!it.any) S.bought[it.id]++;
+  if(it.id==="dragon"){ const w=[0,2,4,6,8,10][Math.floor(Math.random()*6)]; S.coins+=w; toast(w?"🐉 +"+w:"🐉 No luck!",!w); }
+  else { S.bag[it.id]++; toast(it.em+" bought!"); }
+  store(); render();
+}
+function finishRow(c,text){
+  c.append(el("div",{class:"fact",text:"🧠 "+text}),el("div",{class:"row",style:"margin-top:12px"},el("button",{class:"btn go press",onclick:()=>finishZone(false),text:"🏁 Finish zone"})));
+}
+/* ---------- matcher ---------- */
+function matcher(pairs,d,heads,onRight,onDone){
+  if(!d.L){ d.L=shuffle(pairs.map((_,i)=>i)); d.R=shuffle(pairs.map((_,i)=>i)); d.done=[]; d.sL=null; d.sR=null; }
+  const tag=i=>d.done.indexOf(i)+1, mapL={}, mapR={};
+  const tryMatch=()=>{
+    if(d.sL==null||d.sR==null) return;
+    if(d.sL===d.sR){ d.done.push(d.sL); d.sL=d.sR=null; onRight(); store(); if(d.done.length===pairs.length) onDone(); else render(); }
+    else { const a=d.sL,b=d.sR; d.sL=d.sR=null; store(); miss(); [mapL[a],mapR[b]].forEach(x=>{ if(x){ x.classList.remove("sel"); x.classList.add("bad"); }}); setTimeout(render,550); }
+  };
+  const colL=el("div",{class:"grid"},el("div",{class:"colhead",text:heads[0]})), colR=el("div",{class:"grid"},el("div",{class:"colhead",text:heads[1]}));
+  d.L.forEach(i=>{ const ok=d.done.includes(i), [em,txt]=pairs[i][0];
+    const b=el("button",{class:"tile press"+(ok?" ok":"")+(d.sL===i?" sel":""),disabled:ok,onclick:()=>{ d.sL=(d.sL===i?null:i); if(d.sR!=null) tryMatch(); else { store(); render(); } }},el("span",{class:"em","aria-hidden":"true",text:em}),el("span",{text:txt}),ok?el("span",{class:"tag",text:String(tag(i))}):null);
+    mapL[i]=b; colL.append(b); });
+  d.R.forEach(i=>{ const ok=d.done.includes(i), r=pairs[i][1];
+    const b=el("button",{class:"tile press"+(ok?" ok":"")+(d.sR===i?" sel":""),disabled:ok,onclick:()=>{ d.sR=(d.sR===i?null:i); if(d.sL!=null) tryMatch(); else { store(); render(); } }},r.length>1?el("span",{class:"em","aria-hidden":"true",text:r[0]}):null,el("span",{text:r.length>1?r[1]:r[0]}),ok?el("span",{class:"tag",text:String(tag(i))}):null);
+    mapR[i]=b; colR.append(b); });
+  return el("div",{class:"cols"},colL,colR);
+}
+function autoMatch(d,n){ const left=[...Array(n).keys()].filter(i=>!d.done.includes(i)); if(!left.length) return false; d.done.push(left[0]); d.sL=d.sR=null; toast("💡 Matched one!"); return true; }
+
+/* ---------- Zone: ladder ---------- */
+function ladder(){
+  const d=R().d; if(!d.pool){ d.pool=shuffle(LADDER.map((_,i)=>i)); d.placed=[]; d.tries=0; d.locked=[]; store(); }
+  const prefix=()=>{const k=[];for(let i=0;i<5;i++){ if(d.placed[i]===i) k.push(i); else break; } return k;};
+  useHint=()=>{ const k=prefix(); if(k.length>=5) return false; k.push(k.length); d.placed=k; d.locked=k.slice(); toast("💡 Placed one!"); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "The ladder shows who had the most power in ancient China.",
+    "Tap the groups below, starting with the MOST powerful. They fill the ladder from the top down.",
+    "Made a mistake? Tap a step on the ladder to take it off.",
+    "Press Check. Right first time = 10 coins (2nd try 7, after that 4)."]));
+  const lad=el("div",{class:"ladder"});
+  for(let i=0;i<5;i++){ const g=d.placed[i], w=38+i*15, isOk=d.locked.includes(g)&&g===i;
+    lad.append(el("button",{class:"step"+(g!=null?" filled":"")+(isOk?" ok":""),style:"width:min(max("+w+"%,190px),100%)",disabled:g==null||isOk,onclick:()=>{ d.placed.splice(i,1); store(); render(); }},
+      el("span",{class:"n",text:i===0?"Top":i===4?"Bottom":String(i+1)}), g!=null?el("span",{text:LADDER[g][0]+" "+LADDER[g][1]}):el("span",{class:"muted",text:"?"}))); }
+  const pool=el("div",{class:"grid pool"});
+  d.pool.filter(i=>!d.placed.includes(i)).forEach(i=>pool.append(el("button",{class:"tile press",onclick:()=>{ if(d.placed.length<5){ d.placed.push(i); store(); render(); } }},el("span",{class:"em","aria-hidden":"true",text:LADDER[i][0]}),el("span",{text:LADDER[i][1]}))));
+  c.append(lad,pool);
+  if(d.tries>0) c.append(el("div",{class:"fact"},"🧠 Tip: The emperor and nobles ruled. Farmers came next because they grew everyone’s food. Craftsmen made useful things. Merchants were at the bottom because people thought they got rich from other people’s work."));
+  c.append(el("div",{class:"row",style:"margin-top:14px"},el("button",{class:"btn go press",disabled:d.placed.length<5,onclick:()=>{
+    d.tries++;
+    if(d.placed.every((g,i)=>g===i)){ earn([10,7,4][Math.min(2,d.tries-1)]); finishZone(false); }
+    else { R().mist++; const k=prefix(); d.placed=k; d.locked=k.slice(); toast("Not quite!",true); store(); render(); }
+  },text:"✅ Check"})));
+  app.append(c);
+}
+/* ---------- Zone: jigsaw ---------- */
+function jigsaw(svg,title,fact){
+  const N=3, d=R().d; if(!d.order){ d.order=shuffle([...Array(N*N).keys()]); d.placed=[]; store(); }
+  const bg=uri(svg);
+  const pos=i=>((i%N)*50)+"% "+(Math.floor(i/N)*50)+"%";
+  const place=(id,key,node)=>{ const p=+id, k=+key; if(d.placed.includes(p)||d.placed.includes(k)&&false) return;
+    if(p===k){ d.placed.push(p); earn(1); store(); if(d.placed.length===N*N){ if(R().mist===0&&!R().replay) earn(3); render(); } else render(); }
+    else { miss(); flashBad(node); } };
+  useHint=()=>{ const left=d.order.filter(i=>!d.placed.includes(i)); if(!left.length) return false; d.placed.push(left[0]); toast("💡 Placed one!"); store(); return true; };
+  const complete=d.placed.length===N*N;
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "Look at the small picture to see what the finished puzzle looks like.",
+    "Drag each piece into its square in the big frame. (Or tap a piece, then tap a square.)",
+    "+1 coin for each right piece, −1 for a wrong one. No mistakes = 3 bonus coins!"]));
+  const frame=el("div",{class:"frame",style:"--n:"+N,"aria-label":title+" puzzle frame"});
+  for(let i=0;i<N*N;i++){ const f=d.placed.includes(i);
+    const s=el("div",{class:"slot"+(f?" filled jp":""),style:f?"background-image:"+bg+";background-position:"+pos(i):"",text:f?"":String(i+1)});
+    if(!f) dropTarget(s,i,place); frame.append(s); }
+  const side=el("div",{class:"side"},el("div",{class:"muted",style:"font-size:14px",text:"Finished picture:"}),el("div",{class:"peek",style:"background-image:"+bg,role:"img","aria-label":title}));
+  c.append(el("div",{class:"jig"},side,frame));
+  if(complete){
+    c.append(el("div",{class:"fact",text:"🧠 "+fact}),el("div",{class:"row",style:"margin-top:12px"},el("button",{class:"btn go press",onclick:()=>finishZone(false),text:"🏁 Finish zone"})));
+  } else {
+    const tray=el("div",{class:"tray dock"});
+    d.order.filter(i=>!d.placed.includes(i)).forEach(i=>{ const p=el("button",{class:"jp","aria-label":"Puzzle piece",style:"background-image:"+bg+";background-position:"+pos(i)}); draggable(p,i,place); tray.append(p); });
+    c.append(tray);
+  }
+  app.append(c);
+}
+/* ---------- Zone: life ---------- */
+function life(){
+  const d=R().d;
+  if(!d.matched){
+    d.m=d.m||{};
+    useHint=()=>{ const ok=autoMatch(d.m,LIFE.length); if(ok&&d.m.done.length===LIFE.length) d.matched=true; return ok; };
+    const c=el("section",{class:"card chunky"},zoneTop([
+      "In ancient China, girls and women were expected to follow the Three Obediences: always obey a man in the family.",
+      "Tap a stage of life on the LEFT, then tap who she had to obey on the RIGHT (or the other way round).",
+      "+2 coins for each right match, −1 for a wrong one. Then answer a bonus question!"]));
+    c.append(matcher(LIFE,d.m,["Stage of life","Who she obeys"],()=>earn(2),()=>{ d.matched=true; store(); render(); }));
+    app.append(c);
+  } else {
+    d.opts=d.opts||shuffle(["A general who led armies","A silk merchant","A farmer","A craftsman"]);
+    useHint=()=>{ if(d.removed) return false; d.removed=d.opts.filter(o=>o!=="A general who led armies").slice(0,2); toast("💡 Two wrong answers gone!"); return true; };
+    const c=el("section",{class:"card chunky"},zoneTop(["Bonus question for 4 coins: some women still became powerful. Pick the right answer!"]));
+    c.append(el("div",{class:"qbox"},el("span",{class:"em","aria-hidden":"true",text:"🛡️"}),el("p",{text:"Fu Hao was a famous woman in the Shang dynasty. She was…"})));
+    const g=el("div",{class:"grid answers"});
+    d.opts.filter(o=>!(d.removed||[]).includes(o)).forEach(o=>g.append(el("button",{class:"tile press",onclick:()=>{ if(o==="A general who led armies") earn(4); else { miss(); toast("She led armies!",true); } finishZone(false); }},el("span",{text:o}))));
+    c.append(g); app.append(c);
+  }
+}
+/* ---------- Zone: code ---------- */
+function code(){
+  const d=R().d; d.i=d.i||0; const cur=CODES[d.i];
+  useHint=()=>{ if(d.reveal===d.i) return false; d.reveal=d.i; toast("💡 First letter shown!"); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "A spy hid a secret word by moving every letter 3 steps FORWARD in the alphabet.",
+    "To crack it, move each letter 3 steps BACK. Example: D → C → B → A, so D means A.",
+    "Use the code key: find the purple letter, the real letter is underneath it.",
+    "Type the real word and press Crack it. Each word = 3 coins."]));
+  c.append(el("div",{class:"muted",text:"Secret word "+(d.i+1)+" of "+CODES.length}));
+  c.append(el("div",{class:"cipher","aria-label":"Coded word "+cur.c},...[...cur.c].map(ch=>el("span",{text:ch}))));
+  c.append(el("div",{class:"qbox",style:"margin-top:4px"},el("span",{class:"em","aria-hidden":"true",text:cur.em}),el("p",{text:"Clue: "+cur.clue})));
+  if(d.reveal===d.i) c.append(el("p",{text:"💡 The first letter is "+cur.a[0]+"."}));
+  const A="ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+  c.append(el("div",{class:"key"},el("table",null,el("tbody",null,
+    el("tr",null,el("td",{text:"Secret"}),...[...A].map(ch=>el("td",{text:ch}))),
+    el("tr",null,el("td",{text:"Real"}),...[...A].map((_,i)=>el("td",{text:A[(i+23)%26]})))))));
+  const inp=el("input",{type:"text",maxlength:"10",placeholder:"?",autocomplete:"off",autocapitalize:"characters",spellcheck:"false","aria-label":"Real word"});
+  const check=()=>{ const v=inp.value.toUpperCase().replace(/[^A-Z]/g,""); if(!v) return;
+    if(v===cur.a){ earn(3); d.i++; store(); if(d.i>=CODES.length) finishZone(false); else render(); }
+    else { miss(); inp.classList.remove("bad"); void inp.offsetWidth; inp.classList.add("bad"); } };
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter") check(); });
+  c.append(el("div",{class:"row"},inp,el("button",{class:"btn go press",onclick:check,text:"🔓 Crack it"})));
+  app.append(c);
+}
+/* ---------- Zone: timeline ---------- */
+function timeline(){
+  const d=R().d; if(!d.order){ d.order=shuffle(TIMELINE.map((_,i)=>i)); d.placed=[]; store(); }
+  const place=(id,key,node)=>{ if(id===key){ d.placed.push(+id); earn(2); store(); render(); } else { miss(); flashBad(node); } };
+  useHint=()=>{ const left=d.order.filter(i=>!d.placed.includes(i)); if(!left.length) return false; d.placed.push(left[0]); toast("💡 Placed one!"); store(); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "BCE years count DOWN: 475 BCE happened before 221 BCE.",
+    "Drag each event card into the box next to its date. (Or tap a card, then tap a box.)",
+    "+2 coins for each right event, −1 for a wrong one."]));
+  const tl=el("div",{class:"tl"});
+  TIMELINE.forEach((t,i)=>{ const ok=d.placed.includes(i);
+    const box=el("div",{class:"tbox"+(ok?" ok":""),text:ok?t[1]:"Drop event here"});
+    if(!ok) dropTarget(box,i,place);
+    tl.append(el("div",{class:"tslot"},el("div",{class:"tdate",text:t[0]}),box)); });
+  c.append(tl);
+  if(d.placed.length===TIMELINE.length){
+    c.append(el("div",{class:"fact",text:"🧠 "+ZONES[S.cur].fact}),
+      el("div",{class:"row",style:"margin-top:12px"},el("button",{class:"btn go press",onclick:()=>finishZone(false),text:"🏁 Finish zone"})));
+  } else {
+    const cards=el("div",{class:"cards dock"});
+    d.order.filter(i=>!d.placed.includes(i)).forEach(i=>{ const b=el("button",{class:"cardp",text:"⏳ "+TIMELINE[i][1]}); draggable(b,i,place); cards.append(b); });
+    c.append(cards);
+  }
+  app.append(c);
+}
+/* ---------- generic: match ---------- */
+function matchGeneric(cfg){
+  const d=R().d; d.m=d.m||{};
+  useHint=()=>{ const ok=autoMatch(d.m,cfg.pairs.length); if(ok&&d.m.done.length===cfg.pairs.length) d.complete=true; return ok; };
+  const c=el("section",{class:"card chunky"},zoneTop(cfg.steps));
+  if(d.complete){ c.append(matcher(cfg.pairs,d.m,cfg.heads,()=>{},()=>{})); finishRow(c,ZONES[S.cur].fact); }
+  else c.append(matcher(cfg.pairs,d.m,cfg.heads,()=>earn(cfg.per),()=>{ d.complete=true; store(); render(); }));
+  app.append(c);
+}
+/* ---------- generic: sort into boxes ---------- */
+function sortGeneric(o){
+  const cfg=o.cfg, d=R().d; if(!d.order){ d.order=shuffle(cfg.items.map((_,i)=>i)); d.placed=[]; store(); }
+  const place=(id,key,node)=>{ const i=+id; if(cfg.items[i][1]===key){ d.placed.push(i); earn(1); store(); render(); } else { miss(); flashBad(node); } };
+  useHint=()=>{ const left=d.order.filter(i=>!d.placed.includes(i)); if(!left.length) return false; d.placed.push(left[0]); toast("💡 Sorted one!"); store(); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop(o.steps));
+  const mk=([key,title])=>{ const b=el("div",{class:"bin"},el("h3",{text:title}),...cfg.items.map((s,i)=>s[1]===key&&d.placed.includes(i)?el("div",{class:"done",text:s[0]}):null)); dropTarget(b,key,place); return b; };
+  c.append(el("div",{class:"bins"},...cfg.bins.map(mk)));
+  if(d.placed.length===cfg.items.length){ if(o.end) c.append(el("div",{class:"fact",text:o.end})); finishRow(c,ZONES[S.cur].fact); }
+  else { const cards=el("div",{class:"cards dock"});
+    d.order.filter(i=>!d.placed.includes(i)).forEach(i=>{ const b=el("button",{class:"cardp",text:cfg.items[i][0]}); draggable(b,i,place); cards.append(b); });
+    c.append(cards); }
+  app.append(c);
+}
+/* ---------- generic: label a map ---------- */
+function mapGeneric(cfg){
+  const d=R().d; if(!d.order){ d.order=shuffle(cfg.spots.map(s=>s.id)); d.placed=[]; store(); }
+  const place=(id,key,node)=>{ if(id===key){ d.placed.push(id); earn(cfg.per); store(); render(); } else { miss(); flashBad(node); } };
+  useHint=()=>{ const left=d.order.filter(i=>!d.placed.includes(i)); if(!left.length) return false; d.placed.push(left[0]); toast("💡 Placed one!"); store(); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop(cfg.steps));
+  const wrap=el("div",{class:"mapwrap"}); wrap.innerHTML=cfg.svg;
+  cfg.spots.forEach(s=>{ const ok=d.placed.includes(s.id);
+    const m=el("div",{class:"mk"+(ok?" ok":""),style:"left:"+s.x+"%;top:"+s.y+"%","aria-label":ok?s.name:"Empty "+cfg.label+" spot",text:ok?s.name:"?"});
+    if(!ok) dropTarget(m,s.id,place); wrap.append(m); });
+  c.append(wrap);
+  if(d.placed.length===cfg.spots.length) finishRow(c,ZONES[S.cur].fact);
+  else { const labs=el("div",{class:"labels dock"});
+    d.order.filter(id=>!d.placed.includes(id)).forEach(id=>{ const s=cfg.spots.find(x=>x.id===id); const b=el("button",{class:"lab"},el("b",{text:s.name}),el("span",{text:s.clue})); draggable(b,id,place); labs.append(b); });
+    c.append(labs); }
+  app.append(c);
+}
+/* ---------- question card with explanation ---------- */
+function questionCard(c,d,qi,onDone){
+  const q=BANK[qi]; d.opts=d.opts||{}; d.removed=d.removed||{};
+  const opts=d.opts[qi]||(d.opts[qi]=shuffle(q[2]));
+  c.append(el("div",{class:"qbox"},el("span",{class:"em","aria-hidden":"true",text:q[0]}),el("p",{text:q[1]})));
+  const g=el("div",{class:"grid answers"});
+  const show=opts.filter(o=>!(d.removed[qi]||[]).includes(o));
+  if(d.answered){
+    show.forEach(o=>g.append(el("button",{class:"tile"+(o===q[2][0]?" ok":o===d.answered?" bad":""),disabled:true},el("span",{text:o}))));
+    c.append(g, el("div",{class:"fact",text:(d.answered===q[2][0]?"✅ Correct! ":"❌ The answer is: "+q[2][0]+". ")+q[3]}),
+      el("div",{class:"row",style:"margin-top:12px"},el("button",{class:"btn go press",onclick:()=>{ const ok=d.answered===q[2][0]; d.answered=null; store(); onDone(ok); },text:"Next ➜"})));
+  } else {
+    show.forEach(o=>g.append(el("button",{class:"tile press",onclick:()=>{ d.answered=o; if(o===q[2][0]) onRight(); else onWrong(); store(); render(); }},el("span",{text:o}))));
+    c.append(g);
+  }
+  var onRight=()=>{}, onWrong=()=>{};
+  return { set right(f){ onRight=f; }, set wrong(f){ onWrong=f; } };
+}
+/* ---------- Zone: boss ---------- */
+function boss(){
+  const r=R(), d=r.d; if(d.q==null){ d.q=0; d.lives=3; d.order=shuffle([...Array(12).keys()]).slice(0,10); store(); }
+  const qi=d.order[d.q], q=BANK[qi];
+  useHint=()=>{ if(d.answered||d.removed&&d.removed[qi]) return false; d.removed=d.removed||{}; d.opts=d.opts||{}; const opts=d.opts[qi]||(d.opts[qi]=shuffle(q[2])); d.removed[qi]=opts.filter(o=>o!==q[2][0]).slice(0,2); toast("💡 Two wrong answers gone!"); return true; };
+  const hp=d.order.length-d.q;
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "Answer questions about everything you’ve learned to attack Qin Shi Huang.",
+    "Each right answer = 2 coins and knocks off some of his health.",
+    "You have 3 lives. Beat him for a 5-coin bonus!"]));
+  c.append(el("div",{class:"boss"},el("div",{class:"bossface"+(d.answered===q[2][0]?" hit":""),"aria-hidden":"true",text:"👑"}),
+    el("div",{style:"flex:1"},el("h3",{style:"margin:0",text:"Qin Shi Huang"}),el("div",{class:"hpbar",role:"img","aria-label":"Boss health "+hp+" of "+d.order.length},...d.order.map((_,i)=>el("i",{class:i<hp?"":"gone"})))),
+    el("div",{style:"font-size:22px","aria-label":d.lives+" lives",text:"❤️".repeat(Math.max(0,d.lives))+"🖤".repeat(3-Math.max(0,d.lives))})));
+  c.append(el("div",{class:"muted",text:"Question "+(d.q+1)+" of "+d.order.length}));
+  const h=questionCard(c,d,qi,ok=>{
+    if(ok){ d.q++; if(d.q>=d.order.length){ earn(5); return finishZone(false); } }
+    else if(d.lives<=0) return finishZone(false,true);
+    render();
+  });
+  h.right=()=>{ earn(2); }; h.wrong=()=>{ d.lives--; miss(); };
+  app.append(c);
+}
+/* ---------- Zone: revision rush ---------- */
+function rush(){
+  const r=R(), d=r.d; if(!d.qs){ d.qs=shuffle(BANK.map((_,i)=>i)).slice(0,10); d.k=0; d.score=0; store(); }
+  const qi=d.qs[d.k];
+  useHint=()=>{ if(d.answered||d.removed&&d.removed[qi]) return false; d.removed=d.removed||{}; d.opts=d.opts||{}; const q=BANK[qi]; const opts=d.opts[qi]||(d.opts[qi]=shuffle(q[2])); d.removed[qi]=opts.filter(o=>o!==q[2][0]).slice(0,2); toast("💡 Two wrong answers gone!"); return true; };
+  const c=el("section",{class:"card chunky"},zoneTop([
+    "10 random questions from everything in the unit, just like a quick exam practice.",
+    "Read the explanation after each answer, even when you’re right!",
+    r.practice?"Practice round: no coins, just learning.":"+1 coin for each right answer. You get "+RUSH_PER_DAY+" coin rounds per day."]));
+  c.append(el("div",{class:"row",style:"justify-content:space-between"},el("span",{class:"muted",text:"Question "+(d.k+1)+" of "+d.qs.length}),el("span",{class:"muted",text:"Score: "+d.score})));
+  const h=questionCard(c,d,qi,()=>{ d.k++; store(); if(d.k>=d.qs.length) finishZone(false); else render(); });
+  h.right=()=>{ d.score++; earn(1); }; h.wrong=()=>{ r.mist++; };
+  app.append(c);
+}
+render();
+})();
+
+</script>
+</body>
+</html>
